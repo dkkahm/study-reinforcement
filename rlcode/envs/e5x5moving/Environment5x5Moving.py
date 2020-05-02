@@ -100,10 +100,10 @@ class Environment5x5Moving:
     def _is_done(self):
         ston = self.s[0]
 
-        if self._is_goal(ston):
+        if self._is_goal(ston) or self._is_obsticle(ston):
             return True
 
-        return self._is_obsticle(ston)
+        return False
 
     def _is_obsticle(self, p):
         for o in range(3):
@@ -121,8 +121,7 @@ class Environment5x5Moving:
         if self._is_goal(ston):
             return 1
 
-        for o in range(3):
-            if ston == self.s[o + 1]:
-                return -1
+        if self._is_obsticle(ston):
+            return -1
 
-        return 0
+        return -0.1
