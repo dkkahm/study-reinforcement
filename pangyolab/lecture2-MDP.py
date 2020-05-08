@@ -9,9 +9,13 @@ class Agent:
     self.states[state] = action_p
 
   def get_action(self, state):
+    print(state)
     available_actions = [action for action in self.states[state]]
+    print(available_actions)
     available_p = [self.states[state][action] for action in available_actions]
+    print(available_p)
     next_action = np.random.choice(available_actions, p=available_p)
+    print(next_action)
     return next_action
 
 class MDP:
@@ -32,11 +36,13 @@ class MDP:
 
     self.states[name] = { '_value': 0.0, '_terminal': False, '_action_map': action_map, '_pass': _pass }
 
-    total_p = 0.0
-    for next_state in _pass:
-      total_p += _pass[next_state]
-    if total_p != 1.0:
-      raise ValueError('total p is not 1.0')
+    for action in _pass:
+      total_p = 0.0
+      pss = _pass[action]
+      for next_state in pss:
+        total_p += pss[next_state]
+      if total_p != 1.0:
+        raise ValueError('total p is not 1.0')
 
     self.states[name]['_pass'] = _pass
 
@@ -50,6 +56,8 @@ class MDP:
     while not self.states[state_name]['_terminal']:
       state = self.states[state_name]
       action = agent.get_action(state_name)
+      print(action)
+      print(self.states[state]['_pass'][action])
       available_states = [name for name in self.states[state]['_pass'][action]]
       available_pss = [self.states[state]['_pass'][action][name] for name in available_states]
       next_state = np.random.choice(available_states, p=available_pss)
@@ -99,13 +107,14 @@ if __name__ == '__main__':
 
   agent = Agent()
   agent.add_policy('Facebook', {'Facebook': 0.5, 'Quit': 0.5 })
-
-
+  agent.add_policy('Class1', {'Facebook': 0.5, 'Study': 0.5 })
+  agent.add_policy('Class2', {'Study': 0.5, 'Sleep': 0.5 })
+  agent.add_policy('Class3', {'Study': 0.5, 'Pub': 0.5 })
 
   # mdp_student.reset_value()
 
-  for n in range(100000):
-    episode = mdp_student.sample('Class1')
+  for n in range(1):
+    episode = mdp_student.sample('Class1', agent)
     # print(episode)
     # g = mdp_student.get_return_of_episode(episode)
     # print(g)
