@@ -165,9 +165,9 @@ class DQNAgent:
 
   def _build_model(self):
     model = Sequential()
-    model.add(Dense(24, input_shape=(4,), activation='relu', kernel_initializer='he_uniform'))
+    model.add(Dense(24, input_shape=self.env.observation_space.shape, activation='relu', kernel_initializer='he_uniform'))
     model.add(Dense(24, activation='relu', kernel_initializer='he_uniform'))
-    model.add(Dense(2, activation='linear', kernel_initializer='he_uniform'))
+    model.add(Dense(self.env.action_space.n, activation='linear', kernel_initializer='he_uniform'))
     model.compile(optimizer=Adam(lr=self.learning_rate), loss='mse')
     return model
 
