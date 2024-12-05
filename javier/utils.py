@@ -194,3 +194,50 @@ def plot_stats(stats):
             ax.set_title(key, size=18)
     plt.tight_layout()
     plt.show()
+
+def plot_cost_to_go(env, q_network, xlabel=None, ylabel=None):
+    highx, highy = env.observation_space.high
+    lowx, lowy = env.observation_space.low
+    X = torch.linspace(lowx, highx, 100)
+    Y = torch.linspace(lowy, highy, 100)
+    X, Y = torch.meshgrid(X, Y)
+
+    q_net_input = torch.stack([X.flatten(), Y.flatten()], dim=-1)
+    Z = - q_network(q_net_input).max(dim=-1, keepdim=True)[0]
+    Z = Z.reshape(100, 100).detach().numpy()
+    X = X.numpy()
+    Y = Y.numpy()
+
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.add_subplot(111, projection='3d')
+    surf = ax.plot_surface(X, Y, Z, cmap='jet', linewidth=0, antialiased=False)
+    fig.colorbar(surf, shrink=0.5, aspect=5)
+    ax.set_xlabel(xlabel, size=14)
+    ax.set_ylabel(ylabel, size=14)
+    ax.set_title("Estimated cost-to-go", size=18)
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_max_q(env, q_network, xlabel=None, ylabel=None, action_labels=[]):
+    highx, highy = env.observation_space.high
+    lowx, lowy = env.observation_space.low
+    X = torch.linspace(lowx, highx, 100)
+    Y = torch.linspace(lowy, highy, 100)
+    X, Y = torch.meshgrid(X, Y)
+    q_net_input = torch.stack([X.flatten(), Y.flatten()], dim=-1)
+    Z = q_network(q_net_input).argmax(dim=-1, keepdim=True)
+    Z = Z.reshape(100, 100).T.detach().numpy()
+    values = np.unique(Z.ravel())
+    values.sort()
+
+    plt.figure(figsize=(5, 5))
+    plt.xlabel(xlabel, size=14)
+    plt.ylabel(ylabel, size=14)
+    plt.title("Optimal action", size=18)
+
+    im = plt.imshow(Z, cmap='jet')
+    colors = [im.cmap(im.norm(value)) for value in values]
+    patches = [mpatches.Patch(color=color, label=label) for color, label in zip(colors, action_labels)]
+    plt.legend(handles=patches, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    plt.tight_layout()
